@@ -1,0 +1,32 @@
+pipeline:
+  name: zip-and-upload
+
+  stages:
+    - build
+
+  on:
+    push:
+
+jobs:
+  build:
+    stage: build
+
+    steps:
+      - name: Download code
+        uses: actions/checkout@v3
+
+      - name: Zip code
+        run: |
+          zip -r gitea-code.zip *          
+
+      - name: Upload to S3
+        uses: actions/upload-artifact@v3
+        with:
+          name: code
+          path: gitea-code.zip
+          endpoint: 'https://s3.console.aws.amazon.com/s3/buckets/gitea-s3-workflow-bucket?region=us-east-1'
+          access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          bucket-name: gitea-s3-workflow-bucket
+          object-name: gitea-code.zip
+
